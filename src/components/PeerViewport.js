@@ -1,13 +1,13 @@
 import { useEffect, useRef } from "react";
 
-const PeerViewport = ({ peerId, videoTrack }) => {
+const PeerViewport = (videoTrack) => {
   const peerVideoTrack = useRef(null);
   useEffect(() => {
-    peerVideoTrack.current.srcObject = videoTrack;
+    peerVideoTrack.current.srcObject = videoTrack.videoTrack;
   }, []);
   return (
     <div>
-      <video ref={peerVideoTrack} height="400px" width="400px" controls />
+      <video ref={peerVideoTrack} height="400px" width="400px" autoPlay />
     </div>
   );
 };

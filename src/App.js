@@ -15,29 +15,12 @@ function App() {
       roomId: "room",
       peerId: "peer" + Math.floor(Math.random() * 4000),
       displayName: "name",
-      //   device,
-      //   handlerName: handler,
-      // useSimulcast: true,
-      //   useSharingSimulcast,
-      //   forceTcp,
-      // produce: true,
-      // consume: true,
-      //   forceH264,
-      //   forceVP9,
-      //   svc,
-      // datachannel: true,
-      //   externalVideo,
-      //   userToken,
     };
 
     const myHuddleClient = new HuddleClient(config);
 
     setHuddle(myHuddleClient);
   }, []);
-
-  useEffect(() => {
-    console.log(videoConsumerTracks);
-  }, [videoConsumerTracks]);
 
   const getStream = (track) => {
     const stream = new MediaStream();
@@ -56,7 +39,8 @@ function App() {
     });
 
     emitter.on("addProducer", (producer) => {
-      if (producer.kind === "video") {
+      console.log(producer);
+      if (producer.track.kind === "video") {
         const videoStream = producer.track;
         if (typeof videoStream == "object") {
           try {
@@ -76,7 +60,6 @@ function App() {
       if (videoStream.kind === "video") {
         const videoTrack = getStream(videoStream);
         setVideoConsumerTracks([...videoConsumerTracks, videoTrack]);
-        console.log(videoConsumerTracks);
       } else {
         //handle for audio consumer
       }
@@ -94,11 +77,13 @@ function App() {
       <button onClick={_enableWebcam}>Webcam</button>
       <button onClick={async () => await huddle.enableMic()}>Mic</button>
       <video height="400px" width="400px" autoPlay ref={meVideoElem} />
-      {videoConsumerTracks.length !== 0
-        ? videoConsumerTracks.map((track) => {
-            <PeerViewport videoTrack={track} />;
-          })
-        : null}
+      {videoConsumerTracks.map((track, idx) => {
+        return (
+          <>
+            <PeerViewport videoTrack={track} idx={idx} />;
+          </>
+        );
+      })}
     </div>
   );
 }
