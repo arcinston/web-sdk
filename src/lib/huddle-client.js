@@ -1,10 +1,11 @@
 import protooClient from "protoo-client";
 import * as mediasoupClient from "mediasoup-client";
-import deviceInfo from "./utils/deviceInfo";
-// import Logger from "./Logger";
-import { getProtooUrl } from "./utils/urlFactory";
-import emitter from "./utils/EventEmitter";
+import { getProtooUrl } from "./utils/urlFactory.js";
+import emitter from "./utils/EventEmitter.js";
+import deviceInfo from "./utils/deviceInfo.js";
+import axios from "axios";
 
+// import Logger from "./Logger";
 // import * as cookiesManager from "./cookiesManager";
 // import * as requestActions from "../redux/actions/requestActions";
 // import * as stateActions from "../redux/actions/stateActions";
@@ -70,6 +71,7 @@ export default class HuddleClient {
   constructor({
     roomId,
     peerId,
+    apiKey,
     displayName,
     // device,
     handlerName,
@@ -86,10 +88,10 @@ export default class HuddleClient {
     isBot,
     userToken,
     userPassword,
+    window,
   }) {
-    setImmediate(() => {
-      emitter.emit("yolo", { msg: "yo" });
-    });
+    if (!apiKey) throw new Error("Please pass a valid apiKey");
+
     // logger.debug(
     //   'constructor() [roomId:"%s", peerId:"%s", displayName:"%s", device:%s]',
     //   roomId,
@@ -99,6 +101,7 @@ export default class HuddleClient {
     // );
 
     this.userPassword = userPassword;
+    this._window = window;
 
     this.userToken = userToken || null;
     //Peer Id
@@ -123,7 +126,7 @@ export default class HuddleClient {
 
     // Device info.
     // @type {Object}
-    this._device = deviceInfo();
+    this._device = deviceInfo(this._window);
 
     // Whether we want to force RTC over TCP.
     // @type {Boolean}
@@ -194,8 +197,11 @@ export default class HuddleClient {
     this._protooUrl = getProtooUrl({
       roomId,
       peerId,
-      userToken,
+      window: this._window,
+      apiKey,
     });
+
+    this.apiKey = apiKey;
 
     // protoo-client Peer instance.
     // @type {protooClient.Peer}
@@ -313,6 +319,13 @@ export default class HuddleClient {
   }
 
   async join() {
+    try {
+      await axios.get("https://api.huddle01.com/", {
+        headers: { "x-api-key": this.apiKey },
+      });
+    } catch (error) {
+      throw new Error("Invalid API Key passed");
+    }
     const protooTransport = new protooClient.WebSocketTransport(
       this._protooUrl
     );
@@ -323,6 +336,8 @@ export default class HuddleClient {
 
     this._protoo.on("open", async () => {
       this._joinRoom();
+      emitter.emit("roomState", "connected");
+
       // //directly send the bot inside the room
       // if (this._isBot) {
       //   this._joinRoom();
@@ -346,7 +361,6 @@ export default class HuddleClient {
     });
 
     this._protoo.on("failed", (data) => {
-      console.log(data);
       // store.dispatch(
       //   requestActions.notify({
       //     type: "error",
@@ -356,6 +370,7 @@ export default class HuddleClient {
     });
 
     this._protoo.on("disconnected", () => {
+      emitter.emit("roomState", "disconnected");
       // store.dispatch(
       //   requestActions.notify({
       //     type: "error",
@@ -470,6 +485,7 @@ export default class HuddleClient {
                 priority: 1,
                 codec: consumer.rtpParameters.codecs[0].mimeType.split("/")[1],
                 track: consumer.track,
+                peerId,
                 appData, //testing
               },
               peerId
@@ -1017,7 +1033,7 @@ export default class HuddleClient {
           // );
           // store.dispatch(stateActions.removePeer(peerId));
 
-          console.log({ leftPeer: peer });
+          emitter.emit("removePeer", peerId);
 
           break;
         }
@@ -1054,6 +1070,8 @@ export default class HuddleClient {
           const { peerId } = consumer.appData;
 
           // store.dispatch(stateActions.removeConsumer(consumerId, peerId));
+
+          emitter.emit("removeConsumer", { consumerId, peerId });
 
           break;
         }
@@ -3107,3 +3125,5 @@ export default class HuddleClient {
     return this._externalVideoStream;
   }
 }
+
+export { emitter };

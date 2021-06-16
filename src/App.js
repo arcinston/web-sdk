@@ -1,6 +1,8 @@
+// import HuddleClient, { emitter } from "huddle01-client";
+
+import HuddleClient, { emitter } from "./lib/huddle-client";
+
 import { useEffect, useState, useRef } from "react";
-import HuddleClient from "./lib/huddle-client";
-import emitter from "./lib/utils/EventEmitter";
 import { PeerVideo, PeerAudio } from "./components/PeerViewport";
 import { getTrack } from "./lib/utils/helpers";
 
@@ -8,6 +10,7 @@ const config = {
   roomId: "dev",
   peerId: "peer" + Math.floor(Math.random() * 4000),
   displayName: "s3",
+  window,
 };
 
 function App() {
@@ -31,68 +34,74 @@ function App() {
   }, []);
 
   const setupEventListeners = async () => {
-    emitter.on("addPeer", (peer) => {
-      console.log("new peer =>", peer);
-      setPeers((_peers) => [..._peers, peer]);
-      console.log("setPeers", peers);
-    });
+    emitter.on("roomState", (state) => {
+      if (state === "connected") {
+        emitter.on("addPeer", (peer) => {
+          console.log("new peer =>", peer);
+          setPeers((_peers) => [..._peers, peer]);
+          console.log("setPeers", peers);
+        });
 
-    emitter.on("addProducer", (producer) => {
-      console.log(producer);
-      if (producer.track.kind === "video") {
-        const videoStream = producer.track;
-        if (typeof videoStream == "object") {
-          try {
-            meVideoElem.current.srcObject = getTrack(videoStream);
-          } catch (error) {
-            console.error(error);
+        emitter.on("addProducer", (producer) => {
+          console.log(producer);
+          if (producer.track.kind === "video") {
+            const videoStream = producer.track;
+            if (typeof videoStream == "object") {
+              try {
+                meVideoElem.current.srcObject = getTrack(videoStream);
+              } catch (error) {
+                console.error(error);
+              }
+            }
+          } else if (producer.kind === "audio") {
+            //TODO: handle my audio producer
           }
-        }
-      } else if (producer.kind === "audio") {
-        //TODO: handle my audio producer
-      }
-    });
+        });
 
-    emitter.on("addConsumer", (consumer) => {
-      console.log("new consumer =>", consumer);
-      if (consumer.track.kind === "video") {
-        //TODO: handle consumer screenshares
-        const videoStream = consumer.track;
+        emitter.on("addConsumer", (consumer) => {
+          console.log("new consumer =>", consumer);
+          if (consumer.track.kind === "video") {
+            //TODO: handle consumer screenshares
+            const videoStream = consumer.track;
 
-        let _peers = peers;
-        console.log({ _peers });
-        for (const _peer of _peers) {
-          if (_peer.id === consumer.peerId) {
-            console.log("yezzir");
-            _peer.consumers.push(videoStream);
+            let _peers = peers;
+            console.log({ _peers });
+            for (const _peer of _peers) {
+              if (_peer.id === consumer.peerId) {
+                console.log("yezzir");
+                _peer.consumers.push(videoStream);
+              }
+            }
+            console.log({ _peers });
+            setPeers(_peers);
+
+            console.log(peers);
+
+            setConsumerStreams((prevState) => ({
+              ...prevState,
+              video: [...prevState.video, videoStream],
+            }));
+          } else if (consumer.track.kind === "audio") {
+            const audioStream = consumer.track;
+            setConsumerStreams((prevState) => ({
+              ...prevState,
+              audio: [...prevState.audio, audioStream],
+            }));
           }
-        }
-        console.log({ _peers });
-        setPeers(_peers);
+        });
 
-        console.log(peers);
+        emitter.on("removeConsumer", ({ consumerId, peerId }) => {
+          // setConsumerStreams((prevState) =>
+          //   prevState.filter((consumer) => consumer.id !== consumerId)
+          // );
+        });
 
-        setConsumerStreams((prevState) => ({
-          ...prevState,
-          video: [...prevState.video, videoStream],
-        }));
-      } else if (consumer.track.kind === "audio") {
-        const audioStream = consumer.track;
-        setConsumerStreams((prevState) => ({
-          ...prevState,
-          audio: [...prevState.audio, audioStream],
-        }));
+        emitter.on("removePeer", (peerId) => {
+          setPeers((prevState) =>
+            prevState.filter((peer) => peer.id !== peerId)
+          );
+        });
       }
-    });
-
-    emitter.on("removeConsumer", ({ consumerId, peerId }) => {
-      // setConsumerStreams((prevState) =>
-      //   prevState.filter((consumer) => consumer.id !== consumerId)
-      // );
-    });
-
-    emitter.on("removePeer", (peerId) => {
-      setPeers((prevState) => prevState.filter((peer) => peer.id !== peerId));
     });
   };
 
@@ -101,6 +110,7 @@ function App() {
 
     try {
       await huddle.join();
+      console.log("success");
       setupEventListeners();
       setRoomState(true);
     } catch (error) {

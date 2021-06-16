@@ -1,9 +1,10 @@
 import { useEffect, useRef } from "react";
 
-const PeerViewport = (videoTrack) => {
+export const PeerVideo = ({ videoTrack }) => {
   const peerVideoTrack = useRef(null);
+
   useEffect(() => {
-    peerVideoTrack.current.srcObject = videoTrack.videoTrack;
+    peerVideoTrack.current.srcObject = videoTrack;
   }, []);
   return (
     <div>
@@ -11,5 +12,16 @@ const PeerViewport = (videoTrack) => {
     </div>
   );
 };
+export const PeerAudio = ({ audioTrack }) => {
+  const peerAudioTrack = useRef(null);
 
-export default PeerViewport;
+  useEffect(() => {
+    console.log(audioTrack);
+    peerAudioTrack.current.srcObject = audioTrack;
+  }, []);
+  return (
+    <div>
+      <audio ref={peerAudioTrack} autoPlay playsInline controls={false} />
+    </div>
+  );
+};
