@@ -21,3 +21,9 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+src/lib/utils/deviceInfo.js
+src/lib/utils/EventEmitter.js
+src/lib/utils/urlFactory.js
+
+src/lib/huddle-client.js
