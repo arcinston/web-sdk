@@ -12,6 +12,20 @@ export const PeerVideo = ({ videoTrack }) => {
     </div>
   );
 };
+
+export const PeerScreen = ({ screenTrack }) => {
+  const peerScreenTrack = useRef(null);
+
+  useEffect(() => {
+    peerScreenTrack.current.srcObject = screenTrack;
+  }, []);
+  return (
+    <div>
+      <video ref={peerScreenTrack} height="400px" width="400px" autoPlay />
+    </div>
+  );
+};
+
 export const PeerAudio = ({ audioTrack }) => {
   const peerAudioTrack = useRef(null);
 
