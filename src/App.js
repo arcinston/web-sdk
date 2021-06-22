@@ -1,12 +1,19 @@
-import HuddleClient, { emitter } from "huddle01-client";
+// import HuddleClient, { emitter } from "huddle01-client";
 
-// import HuddleClient, { emitter } from "./lib/huddle-client";
+import HuddleClient, { emitter } from "./lib/huddle-client";
+
+// [.] remove producers/consumers
+// [.] start/stop screenshare
+// [] change mic, webcam during the call
+// [] auth
+// [] recordings
 
 import { useEffect, useState, useRef } from "react";
-import { PeerVideo, PeerAudio } from "./components/PeerViewport";
 import { getTrack } from "./lib/utils/helpers";
+import { PeerVideo, PeerAudio } from "./components/PeerViewport";
 
 const config = {
+  apiKey: "",
   roomId: "dev",
   peerId: "peer" + Math.floor(Math.random() * 4000),
   displayName: "s3",
@@ -18,13 +25,17 @@ function App() {
   const [roomState, setRoomState] = useState(false);
   const [micState, setMicState] = useState(false);
   const [webcamState, setWebcamState] = useState(false);
+  const [screenshareState, setScreenshareState] = useState(false);
 
   const [peers, setPeers] = useState([]);
   const [consumerStreams, setConsumerStreams] = useState({
     video: [],
     audio: [],
+    screen: [],
   });
+
   const meVideoElem = useRef(null);
+  const meScreenElem = useRef(null);
 
   //initialize the app
   useEffect(() => {
@@ -34,6 +45,11 @@ function App() {
   }, []);
 
   const setupEventListeners = async () => {
+    emitter.on("roomState", (state) => {
+      if (state === "connected") {
+        alert("connected");
+      }
+    });
     emitter.on("addPeer", (peer) => {
       console.log("new peer =>", peer);
       setPeers((_peers) => [..._peers, peer]);
@@ -42,7 +58,7 @@ function App() {
 
     emitter.on("addProducer", (producer) => {
       console.log(producer);
-      if (producer.track.kind === "video") {
+      if (producer.type === "webcam") {
         const videoStream = producer.track;
         if (typeof videoStream == "object") {
           try {
@@ -51,8 +67,36 @@ function App() {
             console.error(error);
           }
         }
-      } else if (producer.kind === "audio") {
+      } else if (producer.type === "mic") {
         //TODO: handle my audio producer
+      } else if (producer.type === "screen") {
+        const videoStream = producer.track;
+        if (typeof videoStream == "object") {
+          try {
+            meScreenElem.current.srcObject = getTrack(videoStream);
+          } catch (error) {
+            console.error(error);
+          }
+        }
+      }
+    });
+
+    emitter.on("removeProducer", (producer) => {
+      console.log("remove ", producer);
+      if (producer.type === "screen") {
+        try {
+          meScreenElem.current.srcObject = null;
+        } catch (error) {
+          console.error(error);
+        }
+      } else if (producer.type === "webcam") {
+        try {
+          meVideoElem.current.srcObject = null;
+        } catch (error) {
+          console.error(error);
+        }
+      } else if (producer.type === "mic") {
+        //TODO
       }
     });
 
@@ -70,7 +114,6 @@ function App() {
             _peer.consumers.push(videoStream);
           }
         }
-        console.log({ _peers });
         setPeers(_peers);
 
         console.log(peers);
@@ -87,15 +130,19 @@ function App() {
         }));
       }
     });
+
+    emitter.on("removeConsumer", (consumer) => {
+      console.log("remove consumer", consumer);
+    });
   };
 
   const joinRoom = async () => {
     if (!huddle) return;
 
     try {
+      setupEventListeners();
       await huddle.join();
       console.log("success");
-      setupEventListeners();
       setRoomState(true);
     } catch (error) {
       setRoomState(false);
@@ -129,10 +176,31 @@ function App() {
     if (!huddle) return;
     try {
       await huddle.disableWebcam();
-      setWebcamState(true);
+      setWebcamState(false);
     } catch (error) {
       alert(error);
-      setWebcamState(false);
+      // setWebcamState(false);
+    }
+  };
+
+  const startScreenshare = async () => {
+    if (!huddle) return;
+    try {
+      await huddle.enableShare();
+      setScreenshareState(true);
+    } catch (error) {
+      alert(error);
+      setScreenshareState(false);
+    }
+  };
+
+  const stopScreenshare = async () => {
+    if (!huddle) return;
+    try {
+      await huddle.disableShare();
+      setScreenshareState(false);
+    } catch (error) {
+      alert(error);
     }
   };
 
@@ -170,7 +238,13 @@ function App() {
       <button onClick={micState ? disableMic : enableMic}>
         {micState ? "Disable Mic" : "Enable Mic"}
       </button>
-      <video height="400px" width="400px" autoPlay ref={meVideoElem} />
+      <button onClick={screenshareState ? stopScreenshare : startScreenshare}>
+        {screenshareState ? "Disable Screenshare" : "Enable Screenshare"}
+      </button>
+      <div className="me-videoports">
+        <video height="400px" width="400px" autoPlay ref={meVideoElem} />
+        <video height="400px" width="400px" autoPlay ref={meScreenElem} />
+      </div>
       {consumerStreams.video.map((stream, idx) => {
         return <PeerVideo key={idx} videoTrack={getTrack(stream)} />;
       })}
@@ -182,9 +256,3 @@ function App() {
 }
 
 export default App;
-
-//2 peers -> production & consumption of videos
-// audio
-// pause/resume/stop
-
-//2+ peers
