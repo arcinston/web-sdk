@@ -1,31 +1,19 @@
+//client sdk import
+import HuddleClient, { emitter } from "huddle01-client";
+
+//react imports
 import { useEffect, useState, useRef } from "react";
 import { useHistory } from "react-router-dom";
 
-// import HuddleClient, { emitter } from "huddle01-client";
-
-import HuddleClient, { emitter } from "../lib/huddle-client";
-
-// [.] remove producers/consumers
-// [.] start/stop screenshare
-// [.] auth
-// [] recordings
-// [] change mic, webcam during the call
-
+//helper imports
 import { getTrack } from "../lib/utils/helpers";
 import { PeerVideo, PeerAudio, PeerScreen } from "../components/PeerViewport";
 
-const config = {
-  apiKey: "hcDbdLhQvi86kwx3tu8IVav2MjREzCnEsw4K6Vt9",
-  roomId: "dev",
-  peerId: "peer" + Math.floor(Math.random() * 4000),
-  displayName: "s3",
-  window,
-};
-
 function Room() {
   const history = useHistory();
+  //to allow for recordings
   const isBot = localStorage.getItem("bot_password") === "huddle01";
-
+  //initialising states
   const [huddle, setHuddle] = useState(null);
   const [roomState, setRoomState] = useState(false);
   const [micState, setMicState] = useState(false);
@@ -41,82 +29,115 @@ function Room() {
 
   const meVideoElem = useRef(null);
   const meScreenElem = useRef(null);
+  const joinRoomBtn = useRef(null);
+
+  const config = {
+    apiKey: "ASGDkYhPwLi7wHecVIeD5vT64jKt8di70o9Z2LP5",
+    roomId: "C132",
+    peerId: "Rick" + Math.floor(Math.random() * 4000),
+    displayName: "Rick Sanchez",
+    window,
+    isBot, // true/false -- gets calculated on line 15
+  };
 
   //initialize the app
   useEffect(() => {
     history.push(`?roomId=${config.roomId}`);
 
-    if (isBot) {
-      document.getElementById("join-btn").click();
-    }
-
     const myHuddleClient = new HuddleClient(config);
-
     setHuddle(myHuddleClient);
   }, []);
 
+  //recording config
   useEffect(() => {
-    console.log(consumerStreams);
-  }, [consumerStreams]);
+    //joinRoomBtn here can be whatever button/function used that calls `huddle.join()`
+    huddle && isBot && joinRoomBtn.current.click();
+  }, [huddle]);
 
   const setupEventListeners = async () => {
     emitter.on("roomState", (state) => {
-      if (state === "connected") {
-        setRoomState("connected");
+      switch (state) {
+        case "connected":
+          //do whatever
+          break;
+        case "failed":
+          //do whatever
+          break;
+        case "disconnected":
+          //do whatever
+          break;
+        default:
+          setRoomState(state);
+          break;
       }
+      setRoomState(state);
     });
 
     emitter.on("error", (error) => {
       alert(error);
+      //do whatever
     });
 
     emitter.on("addPeer", (peer) => {
       console.log("new peer =>", peer);
       setPeers((_peers) => [..._peers, peer]);
-      console.log("setPeers", peers);
     });
 
     emitter.on("addProducer", (producer) => {
-      console.log(producer);
-      if (producer.type === "webcam") {
-        const videoStream = producer.track;
-        if (typeof videoStream == "object") {
-          try {
-            meVideoElem.current.srcObject = getTrack(videoStream);
-          } catch (error) {
-            console.error(error);
+      console.log("new prod", producer);
+      switch (producer.type) {
+        case "webcam":
+          const videoStream = producer.track;
+          if (typeof videoStream == "object") {
+            try {
+              meVideoElem.current.srcObject = getTrack(videoStream);
+            } catch (error) {
+              console.error(error);
+            }
           }
-        }
-      } else if (producer.type === "mic") {
-        //TODO: handle my audio producer
-      } else if (producer.type === "screen") {
-        const videoStream = producer.track;
-        if (typeof videoStream == "object") {
-          try {
-            meScreenElem.current.srcObject = getTrack(videoStream);
-          } catch (error) {
-            console.error(error);
+          break;
+        case "mic":
+          //do whatever
+          break;
+        case "screen":
+          const videoStream = producer.track;
+          if (typeof videoStream == "object") {
+            try {
+              meScreenElem.current.srcObject = getTrack(videoStream);
+            } catch (error) {
+              console.error(error);
+            }
           }
-        }
+          break;
+
+        default:
+          break;
       }
     });
 
     emitter.on("removeProducer", (producer) => {
       console.log("remove ", producer);
-      if (producer.type === "screen") {
-        try {
-          meScreenElem.current.srcObject = null;
-        } catch (error) {
-          console.error(error);
-        }
-      } else if (producer.type === "webcam") {
-        try {
-          meVideoElem.current.srcObject = null;
-        } catch (error) {
-          console.error(error);
-        }
-      } else if (producer.type === "mic") {
-        //TODO
+      switch (producer.type) {
+        case "webcam":
+          try {
+            meVideoElem.current.srcObject = null;
+          } catch (error) {
+            console.error(error);
+          }
+          break;
+        case "mic":
+          //do whatever
+          break;
+        case "screen":
+          try {
+            meScreenElem.current.srcObject = null;
+          } catch (error) {
+            console.error(error);
+          }
+          break;
+
+        default:
+          break;
       }
     });
 
@@ -201,9 +222,7 @@ function Room() {
     try {
       setupEventListeners();
       await huddle.join();
-      console.log("success");
     } catch (error) {
-      // setRoomState(false);
       alert(error);
     }
   };
@@ -237,7 +256,6 @@ function Room() {
       setWebcamState(false);
     } catch (error) {
       alert(error);
-      // setWebcamState(false);
     }
   };
 
@@ -286,11 +304,20 @@ function Room() {
   };
 
   const startRecording = async () => {
+    if (!huddle) return;
     try {
       const status = await huddle.startRecording();
-      if (status !== true)
-        console.error("an error occurred while initiating recording");
-      console.log("recording initiated");
+      if (status) console.log("recording successfully initiated");
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const stopRecorder = async () => {
+    if (!huddle) return;
+    try {
+      const status = await huddle.stopRecording();
+      if (status) console.log("recording successfully stopped");
     } catch (error) {
       console.error(error);
     }
@@ -304,6 +331,7 @@ function Room() {
       </div>
       <div className="btn-grp">
         <button
+          ref={joinRoomBtn}
           id="join-btn"
           onClick={roomState === "connected" ? leaveRoom : joinRoom}
         >
@@ -318,6 +346,7 @@ function Room() {
         <button onClick={screenshareState ? stopScreenshare : startScreenshare}>
           {screenshareState ? "Disable Screenshare" : "Enable Screenshare"}
         </button>
+        {/* <button onClick={toggleWebcam}>Toggle Webcam</button> */}
       </div>
 
       <div className="peer-ports">
