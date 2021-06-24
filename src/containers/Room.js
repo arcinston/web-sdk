@@ -100,10 +100,10 @@ function Room() {
           //do whatever
           break;
         case "screen":
-          const videoStream = producer.track;
-          if (typeof videoStream == "object") {
+          const screenStream = producer.track;
+          if (typeof screenStream == "object") {
             try {
-              meScreenElem.current.srcObject = getTrack(videoStream);
+              meScreenElem.current.srcObject = getTrack(screenStream);
             } catch (error) {
               console.error(error);
             }
