@@ -8,6 +8,12 @@
 $ npm install --save huddle01-client
 ```
 
+OR
+
+```javascript
+$ yarn add huddle01-client 
+```
+
 2. **Get your API Key:** You can get your access keys in the Developer section of the Huddle01 Dashboard
 
 3. **Import modules & instantiate Huddle01 Client:**
@@ -124,6 +130,10 @@ Please refer to the demo app for application references
 {% endhint %}
 {% endtab %}
 
+{% tab title="" %}
+
+{% endtab %}
+
 {% tab title="addProducer" %}
 **Trigger:** you have a new producer producing to the Huddle servers  
 **Return value:** an producer object with details like your production media track \(eg. webcam/mic/screenshare\) of the type `object`  
@@ -149,7 +159,7 @@ Please refer to the demo app for application references
 
 {% tab title="addConsumer" %}
 **Trigger:** you have a new consumer consuming from the Huddle servers  
-**Return value:** an consumer object with details like your consumption media track \(eg. webcam/mic/screenshare\) of the type `object`  
+**Return value:** a consumer object with details like your consumption media track \(eg. webcam/mic/screenshare\) of the type `object`  
 
 ```javascript
 emitter.on("addConsumer", (consumer) => {
@@ -497,7 +507,9 @@ Recordings will only work in production environments \(or run a local process of
   };
 ```
 {% endtab %}
+{% endtabs %}
 
+{% tabs %}
 {% tab title="stopRecording\(\)" %}
 ```javascript
 const stopRecorder = async () => {

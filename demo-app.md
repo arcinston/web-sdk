@@ -29,7 +29,6 @@ function App() {
 }
 
 export default App;
-
 ```
 {% endtab %}
 
@@ -89,7 +88,7 @@ function Room() {
   useEffect(() => {
     //joinRoomBtn here can be whatever button/function used that calls `huddle.join()`
     huddle && isBot && joinRoomBtn.current.click();
-  }, [huddle]);
+  }, [huddle, isBot]);
 
   const setupEventListeners = async () => {
     emitter.on("roomState", (state) => {
@@ -412,7 +411,6 @@ export const getTrack = (track) => {
   stream.addTrack(track);
   return stream;
 };
-
 ```
 {% endtab %}
 
@@ -459,7 +457,6 @@ export const PeerAudio = ({ audioTrack }) => {
     </div>
   );
 };
-
 ```
 {% endtab %}
 {% endtabs %}
@@ -467,6 +464,4 @@ export const PeerAudio = ({ audioTrack }) => {
 {% hint style="info" %}
 The demo app can also be found on [Github](https://github.com/Huddle-01/web-sdk).
 {% endhint %}
-
-
 
