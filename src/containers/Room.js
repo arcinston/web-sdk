@@ -52,7 +52,7 @@ function Room() {
   useEffect(() => {
     //joinRoomBtn here can be whatever button/function used that calls `huddle.join()`
     huddle && isBot && joinRoomBtn.current.click();
-  }, [huddle && isBot]);
+  }, [huddle, isBot]);
 
   const setupEventListeners = async () => {
     emitter.on("roomState", (state) => {
