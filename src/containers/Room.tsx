@@ -18,6 +18,14 @@ interface ConsumerStreams {
   screen: Array<any>;
 }
 
+interface Producer extends mediasoupClient.types.Producer {
+  type?: string;
+}
+
+interface Consumer extends mediasoupClient.types.Consumer {
+  type?: string;
+}
+
 interface HuddleClientConfig {
   roomId: string;
   peerId: string;
@@ -114,14 +122,16 @@ function Room() {
       setPeers((_peers) => [..._peers, peer]);
     });
 
-    emitter.on("addProducer", (producer: any) => {
+    emitter.on("addProducer", (producer: Producer) => {
       console.log("new prod", producer);
       switch (producer.type) {
         case "webcam":
-          const videoStream = producer.track;
+          const videoStream: MediaStreamTrack | null = producer.track;
           if (typeof videoStream == "object") {
             try {
-              meVideoElem.current.srcObject = getTrack(videoStream);
+              if (videoStream !== null) {
+                meVideoElem.current.srcObject = getTrack(videoStream);
+              }
             } catch (error: any) {
               console.error(error);
             }
@@ -131,10 +141,12 @@ function Room() {
           //do whatever
           break;
         case "screen":
-          const screenStream = producer.track;
+          const screenStream: MediaStreamTrack | null = producer.track;
           if (typeof screenStream == "object") {
             try {
-              meScreenElem.current.srcObject = getTrack(screenStream);
+              if (screenStream !== null) {
+                meScreenElem.current.srcObject = getTrack(screenStream);
+              }
             } catch (error: any) {
               console.error(error);
             }
@@ -146,7 +158,7 @@ function Room() {
       }
     });
 
-    emitter.on("removeProducer", (producer: any) => {
+    emitter.on("removeProducer", (producer: Producer) => {
       console.log("remove ", producer);
       switch (producer.type) {
         case "webcam":
@@ -172,7 +184,7 @@ function Room() {
       }
     });
 
-    emitter.on("addConsumer", (consumer: any) => {
+    emitter.on("addConsumer", (consumer: Consumer) => {
       switch (consumer.type) {
         case "webcam": {
           const videoStream = consumer.track;
@@ -208,7 +220,7 @@ function Room() {
       }
     });
 
-    emitter.on("removeConsumer", (consumer) => {
+    emitter.on("removeConsumer", (consumer: any) => {
       switch (consumer.type) {
         case "screen":
           setConsumerStreams((prevState) => {
