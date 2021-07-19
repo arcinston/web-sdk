@@ -158,12 +158,28 @@ Please refer to the demo app for application references
 
 {% endtab %}
 
+The `Producer` type extends the `Mediasoup Producer` and is given as
+
+```typescript
+interface Producer extends MediaSoupClient.types.Producer {
+  type?: string;
+}
+```
+
+The `Consumer` type extends the `Mediasoup Conusumer` and is given as
+
+```typescript
+interface Consumer extends MediaSoupClient.types.Consumer {
+  type?: string;
+}
+```
+
 {% tab title="addProducer" %}
 **Trigger:** you have a new producer producing to the Huddle servers  
 **Return value:** an producer object with details like your production media track \(eg. webcam/mic/screenshare\) of the type `object`
 
 ```typescript
-emitter.on("addProducer", (producer: any) => {
+emitter.on("addProducer", (producer: Producer) => {
   //do whatever (ideally switch-case between all state types)
 });
 ```
@@ -226,7 +242,7 @@ Please refer to the demo app for application references
 **Return value:** a producer object with details like your production media track \(eg. webcam/mic/screenshare\) peer of the type `object` \(same as the object received on the "add" event\)
 
 ```typescript
-emitter.on("removeProducer", (producer: any) => {
+emitter.on("removeProducer", (producer: Producer) => {
   //do whatever (ideally switch-case between all state types)
 });
 ```
@@ -328,7 +344,7 @@ Please refer to the demo app for application references
 **Return value:** an producer object with details like your production media track \(eg. webcam/mic/screenshare\) of the type `object`
 
 ```typescript
-emitter.on("addProducer", (producer: any) => {
+emitter.on("addProducer", (producer: Producer) => {
   //do whatever (ideally switch-case between all state types)
 });
 ```
@@ -391,7 +407,7 @@ Please refer to the demo app for application references
 **Return value:** a producer object with details like your production media track \(eg. webcam/mic/screenshare\) peer of the type `object` \(same as the object received on the "add" event\)
 
 ```typescript
-emitter.on("removeProducer", (producer: any) => {
+emitter.on("removeProducer", (producer: Producer) => {
   //do whatever (ideally switch-case between all state types)
 });
 ```
