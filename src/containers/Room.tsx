@@ -1,6 +1,9 @@
 //client sdk import
 import HuddleClient, { emitter } from "huddle01-client";
 
+// mediasoup import
+import * as mediasoupClient from "mediasoup-client";
+
 //react imports
 import { useEffect, useState, useRef } from "react";
 import { useHistory } from "react-router-dom";
@@ -9,35 +12,63 @@ import { useHistory } from "react-router-dom";
 import { getTrack } from "../lib/utils/helpers";
 import { PeerVideo, PeerAudio, PeerScreen } from "../components/PeerViewport";
 
+interface ConsumerStreams {
+  video: Array<any>;
+  audio: Array<any>;
+  screen: Array<any>;
+}
+
+interface HuddleClientConfig {
+  roomId: string;
+  peerId: string;
+  apiKey: string;
+  displayName: string;
+  handlerName?: string;
+  useSimulcast?: boolean;
+  useSharingSimulcast?: boolean;
+  forceTcp?: boolean;
+  produce?: boolean;
+  consume?: boolean;
+  forceH264?: boolean;
+  forceVP9?: boolean;
+  svc?: any;
+  datachannel?: boolean;
+  externalVideo?: any;
+  isBot: boolean;
+  userToken?: string;
+  userPassword?: string;
+  window: Window;
+}
+
 function Room() {
   const history = useHistory();
   //to allow for recordings
   const isBot = localStorage.getItem("bot_password") === "huddle01";
   //initialising states
-  const [huddle, setHuddle] = useState(null);
-  const [roomState, setRoomState] = useState(false);
-  const [micState, setMicState] = useState(false);
-  const [webcamState, setWebcamState] = useState(false);
-  const [screenshareState, setScreenshareState] = useState(false);
+  const [huddle, setHuddle] = useState<HuddleClient | null>(null);
+  const [roomState, setRoomState] = useState<string | boolean>(false);
+  const [micState, setMicState] = useState<boolean>(false);
+  const [webcamState, setWebcamState] = useState<boolean>(false);
+  const [screenshareState, setScreenshareState] = useState<boolean>(false);
 
-  const [peers, setPeers] = useState([]);
-  const [consumerStreams, setConsumerStreams] = useState({
+  const [peers, setPeers] = useState<Array<any>>([]);
+  const [consumerStreams, setConsumerStreams] = useState<ConsumerStreams>({
     video: [],
     audio: [],
     screen: [],
   });
 
-  const meVideoElem = useRef(null);
-  const meScreenElem = useRef(null);
-  const joinRoomBtn = useRef(null);
+  const meVideoElem = useRef<any>(null);
+  const meScreenElem = useRef<any>(null);
+  const joinRoomBtn = useRef<any>(null);
 
-  const config = {
+  const config: HuddleClientConfig = {
     apiKey: "ASGDkYhPwLi7wHecVIeD5vT64jKt8di70o9Z2LP5",
     roomId: "C132",
     peerId: "Rick" + Math.floor(Math.random() * 4000),
     displayName: "Rick Sanchez",
     window,
-    isBot, // true/false -- gets calculated on line 15
+    isBot, // true/false -- gets calculated on line 46
   };
 
   //initialize the app
@@ -55,7 +86,7 @@ function Room() {
   }, [huddle, isBot]);
 
   const setupEventListeners = async () => {
-    emitter.on("roomState", (state) => {
+    emitter.on("roomState", (state: string | boolean) => {
       switch (state) {
         case "connected":
           //do whatever
@@ -73,17 +104,17 @@ function Room() {
       setRoomState(state);
     });
 
-    emitter.on("error", (error) => {
+    emitter.on("error", (error: any) => {
       alert(error);
       //do whatever
     });
 
-    emitter.on("addPeer", (peer) => {
+    emitter.on("addPeer", (peer: any) => {
       console.log("new peer =>", peer);
       setPeers((_peers) => [..._peers, peer]);
     });
 
-    emitter.on("addProducer", (producer) => {
+    emitter.on("addProducer", (producer: any) => {
       console.log("new prod", producer);
       switch (producer.type) {
         case "webcam":
@@ -91,7 +122,7 @@ function Room() {
           if (typeof videoStream == "object") {
             try {
               meVideoElem.current.srcObject = getTrack(videoStream);
-            } catch (error) {
+            } catch (error: any) {
               console.error(error);
             }
           }
@@ -104,7 +135,7 @@ function Room() {
           if (typeof screenStream == "object") {
             try {
               meScreenElem.current.srcObject = getTrack(screenStream);
-            } catch (error) {
+            } catch (error: any) {
               console.error(error);
             }
           }
@@ -115,13 +146,13 @@ function Room() {
       }
     });
 
-    emitter.on("removeProducer", (producer) => {
+    emitter.on("removeProducer", (producer: any) => {
       console.log("remove ", producer);
       switch (producer.type) {
         case "webcam":
           try {
             meVideoElem.current.srcObject = null;
-          } catch (error) {
+          } catch (error: any) {
             console.error(error);
           }
           break;
@@ -131,7 +162,7 @@ function Room() {
         case "screen":
           try {
             meScreenElem.current.srcObject = null;
-          } catch (error) {
+          } catch (error: any) {
             console.error(error);
           }
           break;
@@ -141,7 +172,7 @@ function Room() {
       }
     });
 
-    emitter.on("addConsumer", (consumer) => {
+    emitter.on("addConsumer", (consumer: any) => {
       switch (consumer.type) {
         case "webcam": {
           const videoStream = consumer.track;
@@ -218,11 +249,10 @@ function Room() {
 
   const joinRoom = async () => {
     if (!huddle) return;
-
     try {
       setupEventListeners();
       await huddle.join();
-    } catch (error) {
+    } catch (error: any) {
       alert(error);
     }
   };
@@ -232,7 +262,7 @@ function Room() {
     try {
       await huddle.close();
       setRoomState(false);
-    } catch (error) {
+    } catch (error: any) {
       alert(error);
     }
   };
@@ -243,7 +273,7 @@ function Room() {
     try {
       await huddle.enableWebcam();
       setWebcamState(true);
-    } catch (error) {
+    } catch (error: any) {
       setWebcamState(false);
       alert(error);
     }
@@ -254,7 +284,7 @@ function Room() {
     try {
       await huddle.disableWebcam();
       setWebcamState(false);
-    } catch (error) {
+    } catch (error: any) {
       alert(error);
     }
   };
@@ -264,7 +294,7 @@ function Room() {
     try {
       await huddle.enableShare();
       setScreenshareState(true);
-    } catch (error) {
+    } catch (error: any) {
       alert(error);
       setScreenshareState(false);
     }
@@ -275,7 +305,7 @@ function Room() {
     try {
       await huddle.disableShare();
       setScreenshareState(false);
-    } catch (error) {
+    } catch (error: any) {
       alert(error);
     }
   };
@@ -286,7 +316,7 @@ function Room() {
     try {
       huddle.enableMic();
       setMicState(true);
-    } catch (error) {
+    } catch (error: any) {
       setMicState(false);
       alert(error);
     }
@@ -297,7 +327,7 @@ function Room() {
     try {
       huddle.disableMic();
       setMicState(false);
-    } catch (error) {
+    } catch (error: any) {
       alert(error);
       setMicState(true);
     }
@@ -306,9 +336,9 @@ function Room() {
   const startRecording = async () => {
     if (!huddle) return;
     try {
-      const status = await huddle.startRecording();
+      const status: boolean = await huddle.startRecording();
       if (status) console.log("recording successfully initiated");
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
     }
   };
@@ -316,9 +346,9 @@ function Room() {
   const stopRecorder = async () => {
     if (!huddle) return;
     try {
-      const status = await huddle.stopRecording();
+      const status: boolean = await huddle.stopRecording();
       if (status) console.log("recording successfully stopped");
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
     }
   };
