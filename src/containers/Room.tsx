@@ -75,7 +75,7 @@ function Room() {
   useEffect(() => {
     history.push(`?roomId=${config.roomId}`);
 
-    const myHuddleClient = new HuddleClient(config);
+    const myHuddleClient: HuddleClient = new HuddleClient(config);
     setHuddle(myHuddleClient);
   }, []);
 
