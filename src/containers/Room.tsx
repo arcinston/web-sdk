@@ -31,7 +31,7 @@ function Room() {
   const [webcamState, setWebcamState] = useState<boolean>(false);
   const [screenshareState, setScreenshareState] = useState<boolean>(false);
 
-  const [peers, setPeers] = useState<Array<any>>([]);
+  const [peers, setPeers] = useState<Peer[]>([]);
   const [consumerStreams, setConsumerStreams] = useState<IConsumerStreams>({
     video: [],
     audio: [],
