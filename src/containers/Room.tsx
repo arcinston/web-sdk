@@ -4,6 +4,9 @@ import HuddleClient, { emitter } from "huddle01-client";
 // mediasoup import
 import * as mediasoupClient from "mediasoup-client";
 
+// Peer class
+import { Peer } from "protoo-client";
+
 //react imports
 import { useEffect, useState, useRef } from "react";
 import { useHistory } from "react-router-dom";
@@ -13,9 +16,9 @@ import { getTrack } from "../lib/utils/helpers";
 import { PeerVideo, PeerAudio, PeerScreen } from "../components/PeerViewport";
 
 interface ConsumerStreams {
-  video: Array<any>;
-  audio: Array<any>;
-  screen: Array<any>;
+  video: MediaStreamTrack[];
+  audio: MediaStreamTrack[];
+  screen: MediaStreamTrack[];
 }
 
 interface Producer extends mediasoupClient.types.Producer {
@@ -54,7 +57,7 @@ function Room() {
   const isBot = localStorage.getItem("bot_password") === "huddle01";
   //initialising states
   const [huddle, setHuddle] = useState<HuddleClient | null>(null);
-  const [roomState, setRoomState] = useState<string | boolean>(false);
+  const [roomState, setRoomState] = useState<string>("");
   const [micState, setMicState] = useState<boolean>(false);
   const [webcamState, setWebcamState] = useState<boolean>(false);
   const [screenshareState, setScreenshareState] = useState<boolean>(false);
@@ -76,7 +79,7 @@ function Room() {
     peerId: "Rick" + Math.floor(Math.random() * 4000),
     displayName: "Rick Sanchez",
     window,
-    isBot, // true/false -- gets calculated on line 46
+    isBot,
   };
 
   //initialize the app
@@ -94,7 +97,7 @@ function Room() {
   }, [huddle, isBot]);
 
   const setupEventListeners = async () => {
-    emitter.on("roomState", (state: string | boolean) => {
+    emitter.on("roomState", (state: string) => {
       switch (state) {
         case "connected":
           //do whatever
@@ -117,7 +120,7 @@ function Room() {
       //do whatever
     });
 
-    emitter.on("addPeer", (peer: any) => {
+    emitter.on("addPeer", (peer: Peer) => {
       console.log("new peer =>", peer);
       setPeers((_peers) => [..._peers, peer]);
     });
@@ -273,7 +276,7 @@ function Room() {
     if (!huddle) return;
     try {
       await huddle.close();
-      setRoomState(false);
+      setRoomState("");
     } catch (error: any) {
       alert(error);
     }
