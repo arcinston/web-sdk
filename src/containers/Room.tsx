@@ -1,9 +1,6 @@
 //client sdk import
 import HuddleClient, { emitter } from "huddle01-client";
 
-// mediasoup import
-import * as mediasoupClient from "mediasoup-client";
-
 // Peer class
 import { Peer } from "protoo-client";
 
@@ -15,41 +12,13 @@ import { useHistory } from "react-router-dom";
 import { getTrack } from "../lib/utils/helpers";
 import { PeerVideo, PeerAudio, PeerScreen } from "../components/PeerViewport";
 
-interface ConsumerStreams {
-  video: MediaStreamTrack[];
-  audio: MediaStreamTrack[];
-  screen: MediaStreamTrack[];
-}
-
-interface Producer extends mediasoupClient.types.Producer {
-  type?: string;
-}
-
-interface Consumer extends mediasoupClient.types.Consumer {
-  type?: string;
-}
-
-interface HuddleClientConfig {
-  roomId: string;
-  peerId: string;
-  apiKey: string;
-  displayName: string;
-  handlerName?: string;
-  useSimulcast?: boolean;
-  useSharingSimulcast?: boolean;
-  forceTcp?: boolean;
-  produce?: boolean;
-  consume?: boolean;
-  forceH264?: boolean;
-  forceVP9?: boolean;
-  svc?: any;
-  datachannel?: boolean;
-  externalVideo?: any;
-  isBot: boolean;
-  userToken?: string;
-  userPassword?: string;
-  window: Window;
-}
+// interfaces
+import {
+  IConsumer,
+  IProducer,
+  IConsumerStreams,
+  IHuddleClientConfig,
+} from "../interface/interfaces";
 
 function Room() {
   const history = useHistory();
@@ -63,7 +32,7 @@ function Room() {
   const [screenshareState, setScreenshareState] = useState<boolean>(false);
 
   const [peers, setPeers] = useState<Array<any>>([]);
-  const [consumerStreams, setConsumerStreams] = useState<ConsumerStreams>({
+  const [consumerStreams, setConsumerStreams] = useState<IConsumerStreams>({
     video: [],
     audio: [],
     screen: [],
@@ -73,7 +42,7 @@ function Room() {
   const meScreenElem = useRef<any>(null);
   const joinRoomBtn = useRef<any>(null);
 
-  const config: HuddleClientConfig = {
+  const config: IHuddleClientConfig = {
     apiKey: "ASGDkYhPwLi7wHecVIeD5vT64jKt8di70o9Z2LP5",
     roomId: "C132",
     peerId: "Rick" + Math.floor(Math.random() * 4000),
@@ -125,7 +94,7 @@ function Room() {
       setPeers((_peers) => [..._peers, peer]);
     });
 
-    emitter.on("addProducer", (producer: Producer) => {
+    emitter.on("addProducer", (producer: IProducer) => {
       console.log("new prod", producer);
       switch (producer.type) {
         case "webcam":
@@ -161,7 +130,7 @@ function Room() {
       }
     });
 
-    emitter.on("removeProducer", (producer: Producer) => {
+    emitter.on("removeProducer", (producer: IProducer) => {
       console.log("remove ", producer);
       switch (producer.type) {
         case "webcam":
@@ -187,7 +156,7 @@ function Room() {
       }
     });
 
-    emitter.on("addConsumer", (consumer: Consumer) => {
+    emitter.on("addConsumer", (consumer: IConsumer) => {
       switch (consumer.type) {
         case "webcam": {
           const videoStream = consumer.track;
