@@ -1,7 +1,11 @@
 import { useEffect, useRef } from "react";
 
-export const PeerVideo = ({ videoTrack }) => {
-  const peerVideoTrack = useRef(null);
+export const PeerVideo = ({
+  videoTrack,
+}: {
+  videoTrack: MediaProvider | null;
+}) => {
+  const peerVideoTrack = useRef<HTMLVideoElement>(null!);
 
   useEffect(() => {
     peerVideoTrack.current.srcObject = videoTrack;
@@ -13,8 +17,12 @@ export const PeerVideo = ({ videoTrack }) => {
   );
 };
 
-export const PeerScreen = ({ screenTrack }) => {
-  const peerScreenTrack = useRef(null);
+export const PeerScreen = ({
+  screenTrack,
+}: {
+  screenTrack: MediaProvider | null;
+}) => {
+  const peerScreenTrack = useRef<HTMLVideoElement>(null!);
 
   useEffect(() => {
     peerScreenTrack.current.srcObject = screenTrack;
@@ -26,8 +34,12 @@ export const PeerScreen = ({ screenTrack }) => {
   );
 };
 
-export const PeerAudio = ({ audioTrack }) => {
-  const peerAudioTrack = useRef(null);
+export const PeerAudio = ({
+  audioTrack,
+}: {
+  audioTrack: MediaProvider | null;
+}) => {
+  const peerAudioTrack = useRef<HTMLAudioElement>(null!);
 
   useEffect(() => {
     console.log(audioTrack);
