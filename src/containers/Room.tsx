@@ -1,8 +1,9 @@
 //client sdk import
-import HuddleClient, { emitter } from "huddle01-client";
-
-// Peer class
-import { Peer } from "protoo-client";
+import HuddleClient, {
+  emitter,
+  HuddleTypes,
+  HuddleClientConfig,
+} from "huddle01-client";
 
 //react imports
 import { useEffect, useState, useRef } from "react";
@@ -13,12 +14,7 @@ import { getTrack } from "../lib/utils/helpers";
 import { PeerVideo, PeerAudio, PeerScreen } from "../components/PeerViewport";
 
 // interfaces
-import {
-  IConsumer,
-  IProducer,
-  IConsumerStreams,
-  IHuddleClientConfig,
-} from "../interface/interfaces";
+import { IConsumerStreams } from "../interface/interfaces";
 
 function Room() {
   const history = useHistory();
@@ -31,7 +27,7 @@ function Room() {
   const [webcamState, setWebcamState] = useState<boolean>(false);
   const [screenshareState, setScreenshareState] = useState<boolean>(false);
 
-  const [peers, setPeers] = useState<Peer[]>([]);
+  const [peers, setPeers] = useState<HuddleTypes.IPeer[]>([]);
   const [consumerStreams, setConsumerStreams] = useState<IConsumerStreams>({
     video: [],
     audio: [],
@@ -42,7 +38,7 @@ function Room() {
   const meScreenElem = useRef<any>(null);
   const joinRoomBtn = useRef<any>(null);
 
-  const config: IHuddleClientConfig = {
+  const config: HuddleClientConfig = {
     apiKey: "ASGDkYhPwLi7wHecVIeD5vT64jKt8di70o9Z2LP5",
     roomId: "C132",
     peerId: "Rick" + Math.floor(Math.random() * 4000),
@@ -89,12 +85,12 @@ function Room() {
       //do whatever
     });
 
-    emitter.on("addPeer", (peer: Peer) => {
+    emitter.on("addPeer", (peer: HuddleTypes.IPeer) => {
       console.log("new peer =>", peer);
       setPeers((_peers) => [..._peers, peer]);
     });
 
-    emitter.on("addProducer", (producer: IProducer) => {
+    emitter.on("addProducer", (producer: HuddleTypes.IProducer) => {
       console.log("new prod", producer);
       switch (producer.type) {
         case "webcam":
@@ -130,7 +126,7 @@ function Room() {
       }
     });
 
-    emitter.on("removeProducer", (producer: IProducer) => {
+    emitter.on("removeProducer", (producer: HuddleTypes.IProducer) => {
       console.log("remove ", producer);
       switch (producer.type) {
         case "webcam":
@@ -156,7 +152,7 @@ function Room() {
       }
     });
 
-    emitter.on("addConsumer", (consumer: IConsumer) => {
+    emitter.on("addConsumer", (consumer: HuddleTypes.IConsumer) => {
       switch (consumer.type) {
         case "webcam": {
           const videoStream = consumer.track;
