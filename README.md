@@ -16,10 +16,10 @@ $ yarn add huddle01-client
 
 2. **Get your API Key:** You can get your access keys in the Developer section of the Huddle01 Dashboard
 
-3. **Import modules & instantiate Huddle01 Client:**
+3. **Import modules & instantiate Huddle01 Client. Also import the HuddleTypes and HuddleClientConfig to access the types**
 
 ```typescript
-import HuddleClient, { emitter } from "huddle01-client";
+import HuddleClient, { emitter, HuddleTypes, HuddleClientConfig, } from "huddle01-client";
 ```
 
 **The infrastructure mandates a schema on the URL** of the type `https://domain.com/room?roomId=C132`
@@ -33,34 +33,12 @@ history.push(`?roomId=${config.roomId}`);
 Initialise a new object
 
 ```typescript
-const huddle: IHuddleClientConfig = new HuddleClient(config);
+const huddle: HuddleClient = new HuddleClient(config);
 ```
 
-where `config` is of type `IHuddleClientConfig` (provided in the interface directory) given as
+where `config` is of type `HuddleClientConfig` which is exported from the npm package.
 
-```typescript
-interface IHuddleClientConfig {
-  roomId: string;
-  peerId: string;
-  apiKey: string;
-  displayName: string;
-  handlerName?: string;
-  useSimulcast?: boolean;
-  useSharingSimulcast?: boolean;
-  forceTcp?: boolean;
-  produce?: boolean;
-  consume?: boolean;
-  forceH264?: boolean;
-  forceVP9?: boolean;
-  svc?: any;
-  datachannel?: boolean;
-  externalVideo?: any;
-  isBot: boolean;
-  userToken?: string;
-  userPassword?: string;
-  window: Window;
-}
-```
+Along with this, `HuddleTypes` containing types for Producer, Consumer and Peer are also exported from the npm package.
 
 An example `config` object can be given as
 
@@ -68,7 +46,7 @@ An example `config` object can be given as
 //write this as it is -- used to check for the recorder
 const isRecorderBot = localStorage.getItem("bot_password") === "huddle01";
 
-const config: IHuddleClientConfig = {
+const config: HuddleClientConfig = {
   apiKey: "<API Key>",          // API KEY (issued on the dashboard)
   roomId: "C132",               // Room ID
   peerId: "rick254",            // Peer ID (needs to be unique for every peer)
@@ -124,27 +102,19 @@ The emitter that we imported in the 1st step is used to emit events by Huddle ab
     ```
 
 3. **Trigger:** new peer joins the room  
-**Return value:** an entire peer object with all the details about the peer of the type `protooClient.Peer`
+**Return value:** an entire peer object with all the details about the peer of the type `HuddleTypes.IPeer`
 
     ```typescript
-    emitter.on("addPeer", (peer: Peer) => {
+    emitter.on("addPeer", (peer: IPeer) => {
       //do whatever
     });
     ```
 
 4. **Trigger:** you have a new producer producing to the Huddle servers  
-**Return value:** an producer object with details like your production media track \(eg. webcam/mic/screenshare\) of the type `object`
-
-    The `Producer` type extends the `Mediasoup Producer` and is given as
+**Return value:** an producer object with details like your production media track \(eg. webcam/mic/screenshare\) of the type `HuddleTypes.IProducer`.
 
     ```typescript
-    interface IProducer extends MediaSoupClient.types.Producer {
-      type?: string;
-    }
-    ```
-
-    ```typescript
-    emitter.on("addProducer", (producer: Producer) => {
+    emitter.on("addProducer", (producer: IProducer) => {
       //do whatever (ideally switch-case between all state types)
     });
     ```
@@ -158,18 +128,11 @@ The emitter that we imported in the 1st step is used to emit events by Huddle ab
     | a webcam stream consumer | a mic stream consumer | a screenshare stream consumer |
 
 5. **Trigger:** you have a new consumer consuming from the Huddle servers  
-**Return value:** a consumer object with details like your consumption media track \(eg. webcam/mic/screenshare\) of the type `object`
+**Return value:** a consumer object with details like your consumption media track \(eg. webcam/mic/screenshare\) of the type `HuddleTypes.IConsumer`
 
-    The `Consumer` type extends the `Mediasoup Conusumer` and is given as
-
-    ```typescript
-    interface IConsumer extends MediaSoupClient.types.Consumer {
-      type?: string;
-    }
-    ```
 
     ```typescript
-    emitter.on("addConsumer", (consumer: any) => {
+    emitter.on("addConsumer", (consumer: IConsumer) => {
       //do whatever (ideally switch-case between all state types)
     });
     ```
@@ -183,19 +146,19 @@ The emitter that we imported in the 1st step is used to emit events by Huddle ab
     | a webcam stream consumer | a mic stream consumer | a screenshare stream consumer |
 
 6. **Trigger:** one of the existing peers disconnects from the room  
-**Return value:** an entire peer object with all the details about the peer of the type `object`\(same as the object received on the "add" event\)
+**Return value:** an entire peer object with all the details about the peer of the type `HuddleTypes.IPeer`\(same as the object received on the "add" event\)
 
     ```typescript
-    emitter.on("removePeer", (peer: any) => {
+    emitter.on("removePeer", (peer: IPeer) => {
       //do whatever
     });
     ```
 
 7. **Trigger:** you have closed the production of your existing producer to the Huddle servers  
-**Return value:** a producer object with details like your production media track \(eg. webcam/mic/screenshare\) peer of the type `object` \(same as the object received on the "add" event\)
+**Return value:** a producer object with details like your production media track \(eg. webcam/mic/screenshare\) peer of the type `HuddleTypes.IProducer` \(same as the object received on the "add" event\)
 
     ```typescript
-    emitter.on("removeProducer", (producer: Producer) => {
+    emitter.on("removeProducer", (producer: IProducer) => {
       //do whatever (ideally switch-case between all state types)
     });
     ```
@@ -208,10 +171,10 @@ The emitter that we imported in the 1st step is used to emit events by Huddle ab
     | a webcam stream producer | a mic stream producer | a screenshare stream producer |
 
 8. **Trigger:** you have closed the production of your existing producer to the Huddle servers  
-**Return value:** a consumer object with details like your consumption media track \(eg. webcam/mic/screenshare\) peer of the type `object` \(same as the object received on the "add" event\)
+**Return value:** a consumer object with details like your consumption media track \(eg. webcam/mic/screenshare\) peer of the type `HuddleTypes.IConsumer` \(same as the object received on the "add" event\)
 
     ```typescript
-    emitter.on("removeConsumer", (consumer: any) => {
+    emitter.on("removeConsumer", (consumer: IConsumer) => {
       //do whatever (ideally switch-case between all state types)
     });
     ```
