@@ -16,10 +16,10 @@ $ yarn add huddle01-client
 
 2. **Get your API Key:** You can get your access keys in the Developer section of the Huddle01 Dashboard
 
-3. **Import modules & instantiate Huddle01 Client. Also import the HuddleTypes and HuddleClientConfig to access the types**
+3. **Import modules & instantiate Huddle01 Client. Also import the HuddleTypes to access the types**
 
 ```typescript
-import HuddleClient, { emitter, HuddleTypes, HuddleClientConfig, } from "huddle01-client";
+import HuddleClient, { emitter, HuddleTypes } from "huddle01-client";
 ```
 
 **The infrastructure mandates a schema on the URL** of the type `https://domain.com/room?roomId=C132`
@@ -36,7 +36,7 @@ Initialise a new object
 const huddle: HuddleClient = new HuddleClient(config);
 ```
 
-where `config` is of type `HuddleClientConfig` which is exported from the npm package.
+where `config` is of type `HuddleTypes.HuddleClientConfig` which is exported from the npm package.
 
 Along with this, `HuddleTypes` containing types for Producer, Consumer and Peer are also exported from the npm package.
 
@@ -46,7 +46,7 @@ An example `config` object can be given as
 //write this as it is -- used to check for the recorder
 const isRecorderBot = localStorage.getItem("bot_password") === "huddle01";
 
-const config: HuddleClientConfig = {
+const config: HuddleTypes.HuddleClientConfig = {
   apiKey: "<API Key>",          // API KEY (issued on the dashboard)
   roomId: "C132",               // Room ID
   peerId: "rick254",            // Peer ID (needs to be unique for every peer)
@@ -105,7 +105,7 @@ The emitter that we imported in the 1st step is used to emit events by Huddle ab
 **Return value:** an entire peer object with all the details about the peer of the type `HuddleTypes.IPeer`
 
     ```typescript
-    emitter.on("addPeer", (peer: IPeer) => {
+    emitter.on("addPeer", (peer: HuddleTypes.IPeer) => {
       //do whatever
     });
     ```
@@ -114,7 +114,7 @@ The emitter that we imported in the 1st step is used to emit events by Huddle ab
 **Return value:** an producer object with details like your production media track \(eg. webcam/mic/screenshare\) of the type `HuddleTypes.IProducer`.
 
     ```typescript
-    emitter.on("addProducer", (producer: IProducer) => {
+    emitter.on("addProducer", (producer: HuddleTypes.IProducer) => {
       //do whatever (ideally switch-case between all state types)
     });
     ```
@@ -132,7 +132,7 @@ The emitter that we imported in the 1st step is used to emit events by Huddle ab
 
 
     ```typescript
-    emitter.on("addConsumer", (consumer: IConsumer) => {
+    emitter.on("addConsumer", (consumer: HuddleTypes.IConsumer) => {
       //do whatever (ideally switch-case between all state types)
     });
     ```
@@ -149,7 +149,7 @@ The emitter that we imported in the 1st step is used to emit events by Huddle ab
 **Return value:** an entire peer object with all the details about the peer of the type `HuddleTypes.IPeer`\(same as the object received on the "add" event\)
 
     ```typescript
-    emitter.on("removePeer", (peer: IPeer) => {
+    emitter.on("removePeer", (peer: HuddleTypes.IPeer) => {
       //do whatever
     });
     ```
@@ -158,7 +158,7 @@ The emitter that we imported in the 1st step is used to emit events by Huddle ab
 **Return value:** a producer object with details like your production media track \(eg. webcam/mic/screenshare\) peer of the type `HuddleTypes.IProducer` \(same as the object received on the "add" event\)
 
     ```typescript
-    emitter.on("removeProducer", (producer: IProducer) => {
+    emitter.on("removeProducer", (producer: HuddleTypes.IProducer) => {
       //do whatever (ideally switch-case between all state types)
     });
     ```
@@ -174,7 +174,7 @@ The emitter that we imported in the 1st step is used to emit events by Huddle ab
 **Return value:** a consumer object with details like your consumption media track \(eg. webcam/mic/screenshare\) peer of the type `HuddleTypes.IConsumer` \(same as the object received on the "add" event\)
 
     ```typescript
-    emitter.on("removeConsumer", (consumer: IConsumer) => {
+    emitter.on("removeConsumer", (consumer: HuddleTypes.IConsumer) => {
       //do whatever (ideally switch-case between all state types)
     });
     ```
