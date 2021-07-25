@@ -1,9 +1,5 @@
 //client sdk import
-import HuddleClient, {
-  emitter,
-  HuddleTypes,
-  HuddleClientConfig,
-} from "huddle01-client";
+import HuddleClient, { emitter, HuddleTypes } from "huddle01-client";
 
 //react imports
 import { useEffect, useState, useRef } from "react";
@@ -38,7 +34,7 @@ function Room() {
   const meScreenElem = useRef<any>(null);
   const joinRoomBtn = useRef<any>(null);
 
-  const config: HuddleClientConfig = {
+  const config: HuddleTypes.HuddleClientConfig = {
     apiKey: "ASGDkYhPwLi7wHecVIeD5vT64jKt8di70o9Z2LP5",
     roomId: "C132",
     peerId: "Rick" + Math.floor(Math.random() * 4000),
