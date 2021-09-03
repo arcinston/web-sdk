@@ -4,7 +4,7 @@
 
 1. **Get the Huddle01 JS SDK**
 
-```
+```text
 $ npm install --save huddle01-client
 ```
 
@@ -14,9 +14,8 @@ OR
 $ yarn add huddle01-client
 ```
 
-2. **Get your API Key:** You can get your access keys in the Developer section of the Huddle01 Dashboard
-
-3. **Import modules & instantiate Huddle01 Client. Also import the HuddleTypes and HuddleClientConfig to access the types**
+1. **Get your API Key:** You can get your access keys in the Developer section of the Huddle01 Dashboard
+2. **Import modules & instantiate Huddle01 Client. Also import the HuddleTypes and HuddleClientConfig to access the types**
 
 ```typescript
 import HuddleClient, { emitter, HuddleTypes, HuddleClientConfig, } from "huddle01-client";
@@ -63,6 +62,7 @@ By this step, you should be connected to the Huddle servers.
 ```typescript
 huddle && isRecorderBot && joinRoomBtn.click();
 ```
+
 **Where:**
 
 **huddle:** the huddle-client object of type HuddleClient
@@ -78,115 +78,115 @@ The emitter that we imported in the 1st step is used to emit events by Huddle ab
 **The various types of events are:**
 
 1. **Trigger:** on room status changes  
-**Return value:** error object
+   **Return value:** error object
 
-    ```typescript
+   ```typescript
     emitter.on("roomState", (state: string) => {
       //do whatever (ideally switch-case between all state types)
     });
-    ```
+   ```
 
-    #### Different state types:
+   **Different state types:**
 
-    | connected                          | failed                            | disconnected                            |
-    | :--------------------------------- | :-------------------------------- | :-------------------------------------- |
-    | successfully connected to the room | failure in connection to the room | successfully disconnected from the room |
+   | connected | failed | disconnected |
+   | :--- | :--- | :--- |
+   | successfully connected to the room | failure in connection to the room | successfully disconnected from the room |
 
 2. **Trigger:** an error event on client/server side  
-**Return value:** error object
+   **Return value:** error object
 
-    ```typescript
+   ```typescript
     emitter.on("error", (error: any) => {
       //do whatever
     });
-    ```
+   ```
 
 3. **Trigger:** new peer joins the room  
-**Return value:** an entire peer object with all the details about the peer of the type `HuddleTypes.IPeer`
+   **Return value:** an entire peer object with all the details about the peer of the type `HuddleTypes.IPeer`
 
-    ```typescript
+   ```typescript
     emitter.on("addPeer", (peer: IPeer) => {
       //do whatever
     });
-    ```
+   ```
 
 4. **Trigger:** you have a new producer producing to the Huddle servers  
-**Return value:** an producer object with details like your production media track \(eg. webcam/mic/screenshare\) of the type `HuddleTypes.IProducer`.
+   **Return value:** an producer object with details like your production media track \(eg. webcam/mic/screenshare\) of the type `HuddleTypes.IProducer`.
 
-    ```typescript
+   ```typescript
     emitter.on("addProducer", (producer: IProducer) => {
       //do whatever (ideally switch-case between all state types)
     });
-    ```
+   ```
 
-    #### Different state types:
+   **Different state types:**
 
-    `producer.type:`
+   `producer.type:`
 
-    | webcam                   | mic                   | screenshare                   |
-    | :----------------------- | :-------------------- | :---------------------------- |
-    | a webcam stream consumer | a mic stream consumer | a screenshare stream consumer |
+   | webcam | mic | screenshare |
+   | :--- | :--- | :--- |
+   | a webcam stream consumer | a mic stream consumer | a screenshare stream consumer |
 
-5. **Trigger:** you have a new consumer consuming from the Huddle servers  
-**Return value:** a consumer object with details like your consumption media track \(eg. webcam/mic/screenshare\) of the type `HuddleTypes.IConsumer`
+5. **Trigger:** you have a new consumer consuming from the Huddle servers **Return value:** a consumer object with details like your consumption media track \(eg. webcam/mic/screenshare\) of the type `HuddleTypes.IConsumer`
 
-
-    ```typescript
+```typescript
     emitter.on("addConsumer", (consumer: IConsumer) => {
       //do whatever (ideally switch-case between all state types)
     });
-    ```
+```
 
-    #### Different state types:
+```text
+#### Different state types:
 
-    `consumer.type:`
+`consumer.type:`
 
-    | webcam                   | mic                   | screenshare                   |
-    | :----------------------- | :-------------------- | :---------------------------- |
-    | a webcam stream consumer | a mic stream consumer | a screenshare stream consumer |
+| webcam                   | mic                   | screenshare                   |
+| :----------------------- | :-------------------- | :---------------------------- |
+| a webcam stream consumer | a mic stream consumer | a screenshare stream consumer |
+```
 
-6. **Trigger:** one of the existing peers disconnects from the room  
-**Return value:** an entire peer object with all the details about the peer of the type `HuddleTypes.IPeer`\(same as the object received on the "add" event\)
+1. **Trigger:** one of the existing peers disconnects from the room  
+   **Return value:** an entire peer object with all the details about the peer of the type `HuddleTypes.IPeer`\(same as the object received on the "add" event\)
 
-    ```typescript
+   ```typescript
     emitter.on("removePeer", (peer: IPeer) => {
       //do whatever
     });
-    ```
+   ```
 
-7. **Trigger:** you have closed the production of your existing producer to the Huddle servers  
-**Return value:** a producer object with details like your production media track \(eg. webcam/mic/screenshare\) peer of the type `HuddleTypes.IProducer` \(same as the object received on the "add" event\)
+2. **Trigger:** you have closed the production of your existing producer to the Huddle servers  
+   **Return value:** a producer object with details like your production media track \(eg. webcam/mic/screenshare\) peer of the type `HuddleTypes.IProducer` \(same as the object received on the "add" event\)
 
-    ```typescript
+   ```typescript
     emitter.on("removeProducer", (producer: IProducer) => {
       //do whatever (ideally switch-case between all state types)
     });
-    ```
-    #### Different state types:
+   ```
 
-    `producer.type:`
+   **Different state types:**
 
-    | webcam                   | mic                   | screenshare                   |
-    | :----------------------- | :-------------------- | :---------------------------- |
-    | a webcam stream producer | a mic stream producer | a screenshare stream producer |
+   `producer.type:`
 
-8. **Trigger:** you have closed the production of your existing producer to the Huddle servers  
-**Return value:** a consumer object with details like your consumption media track \(eg. webcam/mic/screenshare\) peer of the type `HuddleTypes.IConsumer` \(same as the object received on the "add" event\)
+   | webcam | mic | screenshare |
+   | :--- | :--- | :--- |
+   | a webcam stream producer | a mic stream producer | a screenshare stream producer |
 
-    ```typescript
+3. **Trigger:** you have closed the production of your existing producer to the Huddle servers  
+   **Return value:** a consumer object with details like your consumption media track \(eg. webcam/mic/screenshare\) peer of the type `HuddleTypes.IConsumer` \(same as the object received on the "add" event\)
+
+   ```typescript
     emitter.on("removeConsumer", (consumer: IConsumer) => {
       //do whatever (ideally switch-case between all state types)
     });
-    ```
+   ```
 
-    #### Different state types:
+   **Different state types:**
 
-    `consumer.type:`
+   `consumer.type:`
 
-    | webcam                   | mic                   | screenshare                   |
-    | :----------------------- | :-------------------- | :---------------------------- |
-    | a webcam stream consumer | a mic stream consumer | a screenshare stream consumer |
-
+   | webcam | mic | screenshare |
+   | :--- | :--- | :--- |
+   | a webcam stream consumer | a mic stream consumer | a screenshare stream consumer |
 
 All the data/states received by events need to be maintained by you in your app. Can be achieved using React states/redux or any similar implementations.
 
@@ -194,7 +194,7 @@ Please refer to the demo app where we use local React states to handle these dat
 
 ### Methods Available:
 
-- **huddle.join\(\)**
+* **huddle.join\(\)**
 
   Example given below:
 
@@ -210,7 +210,7 @@ Please refer to the demo app where we use local React states to handle these dat
   };
   ```
 
-- **huddle.close\(\)**
+* **huddle.close\(\)**
 
   `close()` can only be called after `join()` is successful
 
@@ -228,9 +228,9 @@ Please refer to the demo app where we use local React states to handle these dat
   };
   ```
 
-- **huddle.enableWebcam\(\)**
-- **huddle.enableMic\(\)**
-- **huddle.enableShare\(\)**
+* **huddle.enableWebcam\(\)**
+* **huddle.enableMic\(\)**
+* **huddle.enableShare\(\)**
 
   Example given below:
 
@@ -246,9 +246,9 @@ Please refer to the demo app where we use local React states to handle these dat
   };
   ```
 
-- **huddle.disableWebcam\(\)**
-- **huddle.disableShare\(\)**
-- **huddle.disableMic\(\)**
+* **huddle.disableWebcam\(\)**
+* **huddle.disableShare\(\)**
+* **huddle.disableMic\(\)**
 
   Example given below:
 
@@ -266,7 +266,7 @@ Please refer to the demo app where we use local React states to handle these dat
 
   **NOTE:** `enable()` functions need to be called and have returned success first before calling any of the `disable()`counterparts
 
-- **huddle.startRecording\(\)**
+* **huddle.startRecording\(\)**
 
   ```typescript
   const startRecording = async () => {
@@ -282,7 +282,7 @@ Please refer to the demo app where we use local React states to handle these dat
   };
   ```
 
-- **huddle.stopRecordig\(\)**
+* **huddle.stopRecordig\(\)**
 
   ```typescript
   const stopRecorder = async () => {
@@ -299,3 +299,4 @@ Please refer to the demo app where we use local React states to handle these dat
   ```
 
 **NOTE:** Recordings will only work in production environments \(or run a local process of the recorder on your machine if you want to test in development environments\)
+
