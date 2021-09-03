@@ -34,22 +34,38 @@ function Room() {
   const meScreenElem = useRef<any>(null);
   const joinRoomBtn = useRef<any>(null);
 
-  const config: HuddleTypes.HuddleClientConfig = {
-    apiKey: "API-KEY-HERE",
+  const [config, setConfig] = useState<HuddleTypes.HuddleClientConfig>({
+    apiKey: "i4pzqbpxza8vpijQMwZsP1H7nZZEH0TN3vR4NdNS",
     roomId: "C132",
     peerId: "Rick" + Math.floor(Math.random() * 4000),
     displayName: "Rick Sanchez",
     window,
     isBot,
-  };
+  });
+
+  // const config: HuddleTypes.HuddleClientConfig = {
+  //   apiKey: "i4pzqbpxza8vpijQMwZsP1H7nZZEH0TN3vR4NdNS",
+  //   roomId: "C132",
+  //   peerId: "Rick" + Math.floor(Math.random() * 4000),
+  //   displayName: "Rick Sanchez",
+  //   window,
+  //   isBot,
+  // };
 
   //initialize the app
-  useEffect(() => {
+
+  // useEffect(() => {
+  //   history.push(`?roomId=${config.roomId}`);
+
+  //   const myHuddleClient: HuddleClient = new HuddleClient(config);
+  //   setHuddle(myHuddleClient);
+  // }, []);
+  const joinroomfunc = () => {
     history.push(`?roomId=${config.roomId}`);
 
     const myHuddleClient: HuddleClient = new HuddleClient(config);
     setHuddle(myHuddleClient);
-  }, []);
+  };
 
   //recording config
   useEffect(() => {
@@ -328,12 +344,57 @@ function Room() {
       console.error(error);
     }
   };
+  const [roomId, setRoomId] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const handleClick = () => {
+    setConfig((config) => ({
+      ...config,
+      displayName: displayName,
+      roomId: roomId,
+      peerId: displayName + Math.floor(Math.random() * 4000),
+    }));
+  };
 
   return (
-    <div className="App">
+    <div className="App" style={{ backgroundColor: "#ff4d4d" }}>
       <div className="me-ports">
         <video height="400px" width="400px" autoPlay ref={meVideoElem} />
         <video height="400px" width="400px" autoPlay ref={meScreenElem} />
+      </div>
+      <div>
+        <button id="initialize-btn" onClick={joinroomfunc}>
+          Initialize
+        </button>
+        <input
+          id="room-id"
+          value={roomId}
+          onChange={(e) => {
+            setRoomId(e.target.value);
+          }}
+        />
+        <button
+          id="setNameBtn"
+          onClick={() => {
+            handleClick();
+          }}
+        >
+          Set Room Id
+        </button>
+        <input
+          id="display-name"
+          value={displayName}
+          onChange={(e) => {
+            setDisplayName(e.target.value);
+          }}
+        />
+        <button
+          id="setNameBtn"
+          onClick={() => {
+            handleClick();
+          }}
+        >
+          Set Name
+        </button>
       </div>
       <div className="btn-grp">
         <button
