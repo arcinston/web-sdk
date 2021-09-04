@@ -23,7 +23,7 @@ function Room() {
   const [webcamState, setWebcamState] = useState<boolean>(false);
   const [screenshareState, setScreenshareState] = useState<boolean>(false);
 
-  const [peers, setPeers] = useState<HuddleTypes.IPeer[]>([]);
+  const [peer, setPeers] = useState<HuddleTypes.IPeer[]>([]);
   const [consumerStreams, setConsumerStreams] = useState<IConsumerStreams>({
     video: [],
     audio: [],
@@ -377,13 +377,18 @@ function Room() {
         className="peer-ports"
         style={{
           backgroundColor: "#00cccc",
-          flexDirection: "column",
+          flexDirection: "row",
           alignItems: "center",
           alignSelf: "center",
+          display: "flex",
         }}
       >
         {consumerStreams.video.map((stream, idx) => {
-          return <PeerVideo key={idx} videoTrack={getTrack(stream)} />;
+          return (
+            <div>
+              <PeerVideo key={idx} videoTrack={getTrack(stream)} />
+            </div>
+          );
         })}
         {consumerStreams.screen.map((stream, idx) => {
           return <PeerScreen key={idx} screenTrack={getTrack(stream)} />;
@@ -394,7 +399,10 @@ function Room() {
       </div>
       <div
         className="me-ports"
-        style={{ backgroundColor: "#80ff00", alignContent: "center" }}
+        style={{
+          backgroundColor: "#80ff00",
+          display: "flex",
+        }}
       >
         <video height="200px" width="200px" autoPlay ref={meVideoElem} />
         <video height="200px" width="200px" autoPlay ref={meScreenElem} />

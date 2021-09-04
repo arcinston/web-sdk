@@ -10,7 +10,18 @@ export const PeerVideo = ({
   useEffect(() => {
     peerVideoTrack.current.srcObject = videoTrack;
   }, []);
-  return <video ref={peerVideoTrack} height="400px" width="400px" autoPlay />;
+  return (
+    <div>
+      <video
+        ref={peerVideoTrack}
+        style={{ padding: "10px" }}
+        height="400px"
+        width="400px"
+        autoPlay
+      />
+      <text></text>
+    </div>
+  );
 };
 
 export const PeerScreen = ({
@@ -23,7 +34,17 @@ export const PeerScreen = ({
   useEffect(() => {
     peerScreenTrack.current.srcObject = screenTrack;
   }, []);
-  return <video ref={peerScreenTrack} height="400px" width="400px" autoPlay />;
+  return (
+    <div>
+      <video
+        ref={peerScreenTrack}
+        style={{ padding: "10px" }}
+        height="400px"
+        width="400px"
+        autoPlay
+      />
+    </div>
+  );
 };
 
 export const PeerAudio = ({
