@@ -373,11 +373,32 @@ function Room() {
 
   return (
     <div className="App" style={{ backgroundColor: "#ff4d4d" }}>
-      <div className="me-ports">
-        <video height="400px" width="400px" autoPlay ref={meVideoElem} />
-        <video height="400px" width="400px" autoPlay ref={meScreenElem} />
+      <div
+        className="peer-ports"
+        style={{
+          backgroundColor: "#00cccc",
+          flexDirection: "column",
+          alignItems: "center",
+          alignSelf: "center",
+        }}
+      >
+        {consumerStreams.video.map((stream, idx) => {
+          return <PeerVideo key={idx} videoTrack={getTrack(stream)} />;
+        })}
+        {consumerStreams.screen.map((stream, idx) => {
+          return <PeerScreen key={idx} screenTrack={getTrack(stream)} />;
+        })}
+        {consumerStreams.audio.map((stream, idx) => {
+          return <PeerAudio key={idx} audioTrack={getTrack(stream)} />;
+        })}
       </div>
-
+      <div
+        className="me-ports"
+        style={{ backgroundColor: "#80ff00", alignContent: "center" }}
+      >
+        <video height="200px" width="200px" autoPlay ref={meVideoElem} />
+        <video height="200px" width="200px" autoPlay ref={meScreenElem} />
+      </div>
       <div>
         <input
           id="room-id"
@@ -387,14 +408,6 @@ function Room() {
             setRoomId(e.target.value);
           }}
         />
-        {/* <button
-          id="setNameBtn"
-          onClick={() => {
-            handleClick();
-          }}
-        >
-          Set Room Id
-        </button> */}
         <input
           id="display-name"
           placeholder="Enter display name"
@@ -403,14 +416,6 @@ function Room() {
             setDisplayName(e.target.value);
           }}
         />
-        {/* <button
-          id="setNameBtn"
-          onClick={() => {
-            handleClick();
-          }}
-        >
-          Set Name
-        </button> */}
       </div>
       <div>
         <button
@@ -447,18 +452,6 @@ function Room() {
           {screenshareState ? "Disable Screenshare" : "Enable Screenshare"}
         </button>
         {/* <button onClick={toggleWebcam}>Toggle Webcam</button> */}
-      </div>
-
-      <div className="peer-ports">
-        {consumerStreams.video.map((stream, idx) => {
-          return <PeerVideo key={idx} videoTrack={getTrack(stream)} />;
-        })}
-        {consumerStreams.screen.map((stream, idx) => {
-          return <PeerScreen key={idx} screenTrack={getTrack(stream)} />;
-        })}
-        {consumerStreams.audio.map((stream, idx) => {
-          return <PeerAudio key={idx} audioTrack={getTrack(stream)} />;
-        })}
       </div>
     </div>
   );
