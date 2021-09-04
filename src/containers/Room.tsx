@@ -33,7 +33,10 @@ function Room() {
   const meVideoElem = useRef<any>(null);
   const meScreenElem = useRef<any>(null);
   const joinRoomBtn = useRef<any>(null);
-
+  const initBtn = useRef<any>(null);
+  const ssBtn = useRef<any>(null);
+  const micBtn = useRef<any>(null);
+  const webcamBtn = useRef<any>(null);
   const [config, setConfig] = useState<HuddleTypes.HuddleClientConfig>({
     apiKey: "i4pzqbpxza8vpijQMwZsP1H7nZZEH0TN3vR4NdNS",
     roomId: "C132",
@@ -42,6 +45,7 @@ function Room() {
     window,
     isBot,
   });
+  const [isInit, setIsInit] = useState<string>("not-initialized");
 
   // const config: HuddleTypes.HuddleClientConfig = {
   //   apiKey: "i4pzqbpxza8vpijQMwZsP1H7nZZEH0TN3vR4NdNS",
@@ -60,11 +64,19 @@ function Room() {
   //   const myHuddleClient: HuddleClient = new HuddleClient(config);
   //   setHuddle(myHuddleClient);
   // }, []);
+  useEffect(() => {
+    micBtn.current.disabled = true;
+    webcamBtn.current.disabled = true;
+    ssBtn.current.disabled = true;
+    joinRoomBtn.current.disabled = true;
+  }, []);
   const joinroomfunc = () => {
     history.push(`?roomId=${config.roomId}`);
 
     const myHuddleClient: HuddleClient = new HuddleClient(config);
     setHuddle(myHuddleClient);
+    initBtn.current.disabled = true;
+    joinRoomBtn.current.disabled = false;
   };
 
   //recording config
@@ -243,6 +255,9 @@ function Room() {
     if (!huddle) return;
     try {
       setupEventListeners();
+      micBtn.current.disabled = false;
+      ssBtn.current.disabled = false;
+      webcamBtn.current.disabled = false;
       await huddle.join();
     } catch (error: any) {
       alert(error);
@@ -347,6 +362,7 @@ function Room() {
   const [roomId, setRoomId] = useState("");
   const [displayName, setDisplayName] = useState("");
   const handleClick = () => {
+    setIsInit("initialized");
     setConfig((config) => ({
       ...config,
       displayName: displayName,
@@ -361,39 +377,50 @@ function Room() {
         <video height="400px" width="400px" autoPlay ref={meVideoElem} />
         <video height="400px" width="400px" autoPlay ref={meScreenElem} />
       </div>
+
       <div>
-        <button id="initialize-btn" onClick={joinroomfunc}>
-          Initialize
-        </button>
         <input
           id="room-id"
           value={roomId}
+          placeholder="Enter room id"
           onChange={(e) => {
             setRoomId(e.target.value);
           }}
         />
-        <button
+        {/* <button
           id="setNameBtn"
           onClick={() => {
             handleClick();
           }}
         >
           Set Room Id
-        </button>
+        </button> */}
         <input
           id="display-name"
+          placeholder="Enter display name"
           value={displayName}
           onChange={(e) => {
             setDisplayName(e.target.value);
           }}
         />
-        <button
+        {/* <button
           id="setNameBtn"
           onClick={() => {
             handleClick();
           }}
         >
           Set Name
+        </button> */}
+      </div>
+      <div>
+        <button
+          id="initialize-btn"
+          ref={initBtn}
+          onClick={isInit === "not-initialized" ? handleClick : joinroomfunc}
+        >
+          {isInit === "not-initialized"
+            ? "Save Name and Room-id"
+            : "Initialize Room"}
         </button>
       </div>
       <div className="btn-grp">
@@ -404,13 +431,19 @@ function Room() {
         >
           {roomState === "connected" ? "Leave Room" : "Join Room"}
         </button>
-        <button onClick={webcamState ? disableWebcam : enableWebcam}>
+        <button
+          ref={webcamBtn}
+          onClick={webcamState ? disableWebcam : enableWebcam}
+        >
           {webcamState ? "Disable Webcam" : "Enable Webcam"}
         </button>
-        <button onClick={micState ? disableMic : enableMic}>
+        <button ref={micBtn} onClick={micState ? disableMic : enableMic}>
           {micState ? "Disable Mic" : "Enable Mic"}
         </button>
-        <button onClick={screenshareState ? stopScreenshare : startScreenshare}>
+        <button
+          ref={ssBtn}
+          onClick={screenshareState ? stopScreenshare : startScreenshare}
+        >
           {screenshareState ? "Disable Screenshare" : "Enable Screenshare"}
         </button>
         {/* <button onClick={toggleWebcam}>Toggle Webcam</button> */}
